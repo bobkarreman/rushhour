@@ -71,42 +71,45 @@ class Board(object):
         """ Checks if a slot is in use by a car """
         return self.matrix[y][x] == self.EMPTY_CHAR
 
-    def move_car(self, car, x, y):
+    def move_car(self, car, move_x, move_y):
         """ Moves the car and returns a new Board """
+        move = (car, move_x, move_y)
         new_cars = set()
         for c in self.cars:
             if c is car:
-                new_cars.add(Car(c.name, x, y, c.length, c.orientation))
+                new_cars.add(Car(c.name, c.x + move_x, c.y + move_y, c.length, c.orientation))
             else:
                 new_cars.add(Car(c.name, c.x, c.y, c.length, c.orientation))
         new_board = Board(new_cars)
-        return new_board
+        return move, new_board
 
     def possibilities(self):
-        """ Returns a list of boards (moves) that are all possible from the current state of this board """
-        boards = []
+        """
+        Returns a list of moves (move, board) that are all possible from the current state of this board.
+        """
+        moves = []
         for car in self.cars:
             if car.is_horizontal():
                 # Can move left
                 if car.x - 1 >= 0 and self.slot_free(car.x - 1, car.y):
                     # print("Car %s can move Left" % car.name, car.x-1, car.y)
-                    boards.append(self.move_car(car, car.x - 1, car.y))
+                    moves.append(self.move_car(car, -1, 0))
 
                 # Can move right
                 if car.x + car.length < self.SIZE and self.slot_free(car.x + car.length, car.y):
                     # print("Car %s can move Right" % car.name, car.x + 1, car.y)
-                    boards.append(self.move_car(car, car.x + 1, car.y))
+                    moves.append(self.move_car(car, +1, 0))
             else:
                 # Can move up
                 if car.y - 1 >= 0 and self.slot_free(car.x, car.y - 1):
                     # print("Car %s can move Up" % car.name, car.x, car.y -1)
-                    boards.append(self.move_car(car, car.x, car.y - 1))
+                    moves.append(self.move_car(car, 0, -1))
 
                 # Can move down
                 if car.y + car.length < self.SIZE and self.slot_free(car.x, car.y + car.length):
                     # print("Car %s can move Down" % car.name, car.x, car.y + 1)
-                    boards.append(self.move_car(car, car.x, car.y + 1))
-        return boards
+                    moves.append(self.move_car(car, 0, +1))
+        return moves
 
 
 class Rushhour(object):
@@ -133,7 +136,7 @@ class Rushhour(object):
             return list(car_map.values())
 
     @staticmethod
-    def find_solution(board):
+    def find_solution(start_board):
         """
         Use a BFS (bread first search) algorithm to find the shortest path to the solution for the given board.
 
@@ -143,14 +146,15 @@ class Rushhour(object):
         """
         # TODO: Keep track of the path to the solution
         seen = set()
+        paths = {}
 
         queue = deque()
-        queue.append(board)
+        queue.append((None, start_board))
 
         idx = 0
         while len(queue) > 0:
             # Get first item from the queue
-            board = queue.popleft()
+            move, board = queue.popleft()
 
             # If board is already seen skip it (there was a faster way to get to that board)
             if str(board) in seen:
@@ -160,16 +164,34 @@ class Rushhour(object):
 
             if board.is_finished():
                 print("We found a solution by checking %s boards!" % idx)
-                return True
 
-            new_boards = board.possibilities()
-            queue.extend(new_boards)
+                print("Paths length", len(paths))
+                return Rushhour.reconstruct_path(start_board, board, paths)
+
+            possibilities = board.possibilities()
+            queue.extend(possibilities)
+
+            # Keep track of the path
+            for _, next_board in possibilities:
+                paths[next_board] = (move, board)
 
             idx += 1
             if idx > 100000:
                 print('More then 100000 moves stopping')
                 break
-        return False
+        return None
+
+    @staticmethod
+    def reconstruct_path(start_board, end_board, paths):
+        """ Returns a list of moves needed to solve the puzzle"""
+        solution_path = []
+        board = end_board
+        while board != start_board:
+            move, board = paths[board]
+            solution_path.append((move, board))
+        solution_path.append((None, start_board))
+        solution_path.reverse()
+        return solution_path
 
 
 def main(path):
@@ -180,11 +202,29 @@ def main(path):
     print(board.print_board())
 
     start = datetime.now()
-    is_finished = Rushhour.find_solution(board)
+    solution_path = Rushhour.find_solution(board)
     delta = datetime.now() - start
 
-    if is_finished:
-        print("Solution found in %s seconds" % delta.total_seconds())
+    if solution_path:
+        print("Solution found in %s seconds and %s steps" % (delta.total_seconds(), len(solution_path)))
+
+        for move, board in solution_path:
+            if move:
+                car, x, y = move
+                direction = "left"
+                if x == -1:
+                    direction = "left"
+                elif x == 1:
+                    direction = "right"
+                elif y == -1:
+                    direction = "up"
+                elif y == 1:
+                    direction = "down"
+
+                print('--------------------------------')
+                print("Move car %s %s" % (car.name, direction))
+                print(board.print_board())
+        print('--------------------------------')
     else:
         print('No solution found :-(')
 
