@@ -6,7 +6,7 @@ from rushhour import Rushhour, Board, Car
 class TestBoard(unittest.TestCase):
 
     def test_parsing_files(self):
-        path = '../challenges/test.txt'
+        path = 'challenges/test.txt'
         cars = Rushhour.parse_file(path)
         self.assertEquals(len(cars), 1)
 
@@ -17,7 +17,7 @@ class TestBoard(unittest.TestCase):
         self.assertEquals(red_car.orientation, Car.HORIZONTAL)
 
     def test_print_board(self):
-        path = '../challenges/simple.txt'
+        path = 'challenges/simple.txt'
         with open(path) as f:
             data = f.read()
 
@@ -31,7 +31,7 @@ class TestBoard(unittest.TestCase):
             self.assertEquals(board.print_board(), data)
 
     def test_board_parse_simple(self):
-        path = '../challenges/simple.txt'
+        path = 'challenges/simple.txt'
         cars = Rushhour.parse_file(path)
         a = None
         for car in cars:
@@ -45,7 +45,7 @@ class TestBoard(unittest.TestCase):
         self.assertEquals(a.orientation, "vertical")
 
     def test_board_validation(self):
-        path = '../challenges/simple.txt'
+        path = 'challenges/simple.txt'
         cars = Rushhour.parse_file(path)
         board = Board(cars)
 

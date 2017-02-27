@@ -11,7 +11,7 @@ class TestMoves(unittest.TestCase):
         Test if the board still contains all the cars when moving the cars around
         """
 
-        cars = Rushhour.parse_file('../challenges/provided.txt')
+        cars = Rushhour.parse_file('challenges/provided.txt')
         board = Board(cars)
 
         seen = set()
