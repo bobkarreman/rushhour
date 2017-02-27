@@ -33,17 +33,17 @@ class TestMoves(unittest.TestCase):
             if str(board) in seen:
                 continue
 
-            self.assertEquals(str(board).count('*'), 14)
-            self.assertEquals(str(board).count('r'), 2)
-            self.assertEquals(str(board).count('A'), 2)
-            self.assertEquals(str(board).count('B'), 2)
-            self.assertEquals(str(board).count('C'), 2)
-            self.assertEquals(str(board).count('E'), 3)
-            self.assertEquals(str(board).count('F'), 3)
-            self.assertEquals(str(board).count('G'), 2)
-            self.assertEquals(str(board).count('H'), 2)
-            self.assertEquals(str(board).count('I'), 2)
-            self.assertEquals(str(board).count('J'), 2)
+            self.assertEqual(str(board).count('*'), 14)
+            self.assertEqual(str(board).count('r'), 2)
+            self.assertEqual(str(board).count('A'), 2)
+            self.assertEqual(str(board).count('B'), 2)
+            self.assertEqual(str(board).count('C'), 2)
+            self.assertEqual(str(board).count('E'), 3)
+            self.assertEqual(str(board).count('F'), 3)
+            self.assertEqual(str(board).count('G'), 2)
+            self.assertEqual(str(board).count('H'), 2)
+            self.assertEqual(str(board).count('I'), 2)
+            self.assertEqual(str(board).count('J'), 2)
 
             seen.add(str(board))
 
