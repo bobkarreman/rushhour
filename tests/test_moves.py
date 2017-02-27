@@ -17,11 +17,11 @@ class TestMoves(unittest.TestCase):
         seen = set()
 
         queue = deque()
-        queue.append(board)
+        queue.append((None, board))
 
         idx = 0
         while len(queue) > 0:
-            board = queue.popleft()
+            move, board = queue.popleft()
             """
             * * * * A A
             * * B B C C
