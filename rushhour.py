@@ -69,7 +69,11 @@ class Board(object):
     def slot_free(self, x, y):
         # print("Slot free:", x, y)
         """ Checks if a slot is in use by a car """
-        return self.matrix[y][x] == self.EMPTY_CHAR
+        try:
+            return self.matrix[y][x] == self.EMPTY_CHAR
+        except IndexError:
+            # If the slot is not inside the grid consider it not free to move to
+            return False
 
     def move_car(self, car, move_x, move_y):
         """ Moves the car and returns a new Board """
@@ -83,12 +87,48 @@ class Board(object):
         new_board = Board(new_cars)
         return move, new_board
 
+    def get_moves(self, car):
+        moves = []
+
+        if car.is_horizontal():
+            # Can move left
+            for i in range(car.x):
+                move_x = -1 * (i + 1)
+                if self.slot_free(car.x + move_x, car.y):
+                    moves.append((move_x, 0))
+
+            # Can move right
+            for i in range(self.SIZE - car.x - (car.length - 1)):
+                move_x = i + 1
+                print(move_x)
+                if self.slot_free(car.x + move_x, car.y):
+                    print("Car %s can move right" % car.name, car.x + move_x, car.y)
+                    moves.append((move_x, 0))
+        else:
+            # Can move up
+            for i in range(car.y):
+                move_y = -1 * (i + 1)
+                if self.slot_free(car.x, car.y + move_y):
+                    # print("Car %s can move Up" % car.name, car.x + move_x, car.y + move_y)
+                    moves.append((0, move_y))
+
+            # Can move down
+            for i in range(self.SIZE - car.y - (car.length - 1)):
+                move_y = i + 1
+                if self.slot_free(car.x, car.y + move_y):
+                    # print("Car %s can move Down" % car.name, car.x, car.y + 1)
+                    moves.append((0, move_y))
+        return moves
+
     def possibilities(self):
         """
         Returns a list of moves (move, board) that are all possible from the current state of this board.
         """
         moves = []
         for car in self.cars:
+            # for move_x, move_y in self.get_moves(car):
+            #     moves.append(self.move_car(car, move_x, move_y))
+
             if car.is_horizontal():
                 # Can move left
                 if car.x - 1 >= 0 and self.slot_free(car.x - 1, car.y):
@@ -108,7 +148,13 @@ class Board(object):
                 # Can move down
                 if car.y + car.length < self.SIZE and self.slot_free(car.x, car.y + car.length):
                     # print("Car %s can move Down" % car.name, car.x, car.y + 1)
-                    moves.append(self.move_car(car, 0, +1))
+                    moves.append(self.move_car(car, 0, 1))
+                #
+                # # Can move down
+                # for i in range(self.SIZE - car.y - (car.length -1)):
+                #     if car.y + car.length + i < self.SIZE and self.slot_free(car.x, car.y + car.length + i):
+                #         # print("Car %s can move Down" % car.name, car.x, car.y + 1)
+                #         moves.append(self.move_car(car, 0, i+1))
         return moves
 
 
@@ -212,13 +258,13 @@ def main(path):
             if move:
                 car, x, y = move
                 direction = "left"
-                if x == -1:
+                if x < 0:
                     direction = "left"
-                elif x == 1:
+                elif x > 0:
                     direction = "right"
-                elif y == -1:
+                elif y < 0:
                     direction = "up"
-                elif y == 1:
+                elif y > 0:
                     direction = "down"
 
                 print('--------------------------------')
