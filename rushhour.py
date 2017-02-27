@@ -82,7 +82,7 @@ class Rushhour(object):
                             car_map[column] = Car(column, x, y, 1)
                         else:
                             car = car_map[column]
-                            car.orientation = Car.VERTICAL if x == car.x else Car.VERTICAL
+                            car.orientation = Car.VERTICAL if x == car.x else Car.HORIZONTAL
                             car.x = min(x, car.x)
                             car.y = min(y, car.y)
                             car.length += 1
