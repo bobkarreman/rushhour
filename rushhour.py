@@ -163,8 +163,10 @@ class Rushhour(object):
         """
         Use a BFS (bread first search) algorithm to find the shortest path to the solution for the given board.
 
-        An some other algorithms that could be used are A* or Dijkstra
-        Which adds more complexity, that could be used to add a weight to certain moves but not needed in this case.
+        Some other algorithms that could be used are A* or Dijkstra
+        Which adds more complexity to the BFS algorithm, that could be used to add a weight to certain moves
+        but that's not really needed in this case.
+        It can be useful to find the shortest path over actual roads (where you take the actual road length into account).
         ref: http://www.redblobgames.com/pathfinding/a-star/implementation.html
         """
         seen = set()
