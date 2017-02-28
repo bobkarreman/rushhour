@@ -88,36 +88,40 @@ class Board(object):
         return move, new_board
 
     def get_moves(self, car):
+        """
+        Get all moves the car can make, if a car can move multiple squares all those moves are returned as separate moves.
+        Making it possible to group those moves into one "slide"
+        """
         moves = []
 
         if car.is_horizontal():
             # Can move left
             for i in range(car.x):
                 move_x = -1 * (i + 1)
-                if self.slot_free(car.x + move_x, car.y):
-                    moves.append((move_x, 0))
+                if not self.slot_free(car.x + move_x, car.y):
+                    break
+                moves.append((move_x, 0))
 
             # Can move right
             for i in range(self.SIZE - car.x - (car.length - 1)):
                 move_x = i + 1
-                print(move_x)
-                if self.slot_free(car.x + move_x, car.y):
-                    print("Car %s can move right" % car.name, car.x + move_x, car.y)
-                    moves.append((move_x, 0))
+                if not self.slot_free((car.x + car.length - 1) + move_x, car.y):
+                    break
+                moves.append((move_x, 0))
         else:
             # Can move up
             for i in range(car.y):
                 move_y = -1 * (i + 1)
-                if self.slot_free(car.x, car.y + move_y):
-                    # print("Car %s can move Up" % car.name, car.x + move_x, car.y + move_y)
-                    moves.append((0, move_y))
+                if not self.slot_free(car.x, car.y + move_y):
+                    break
+                moves.append((0, move_y))
 
             # Can move down
             for i in range(self.SIZE - car.y - (car.length - 1)):
                 move_y = i + 1
-                if self.slot_free(car.x, car.y + move_y):
-                    # print("Car %s can move Down" % car.name, car.x, car.y + 1)
-                    moves.append((0, move_y))
+                if not self.slot_free(car.x, (car.y + car.length - 1) + move_y):
+                    break
+                moves.append((0, move_y))
         return moves
 
     def possibilities(self):
@@ -126,35 +130,8 @@ class Board(object):
         """
         moves = []
         for car in self.cars:
-            # for move_x, move_y in self.get_moves(car):
-            #     moves.append(self.move_car(car, move_x, move_y))
-
-            if car.is_horizontal():
-                # Can move left
-                if car.x - 1 >= 0 and self.slot_free(car.x - 1, car.y):
-                    # print("Car %s can move Left" % car.name, car.x-1, car.y)
-                    moves.append(self.move_car(car, -1, 0))
-
-                # Can move right
-                if car.x + car.length < self.SIZE and self.slot_free(car.x + car.length, car.y):
-                    # print("Car %s can move Right" % car.name, car.x + 1, car.y)
-                    moves.append(self.move_car(car, +1, 0))
-            else:
-                # Can move up
-                if car.y - 1 >= 0 and self.slot_free(car.x, car.y - 1):
-                    # print("Car %s can move Up" % car.name, car.x, car.y -1)
-                    moves.append(self.move_car(car, 0, -1))
-
-                # Can move down
-                if car.y + car.length < self.SIZE and self.slot_free(car.x, car.y + car.length):
-                    # print("Car %s can move Down" % car.name, car.x, car.y + 1)
-                    moves.append(self.move_car(car, 0, 1))
-                #
-                # # Can move down
-                # for i in range(self.SIZE - car.y - (car.length -1)):
-                #     if car.y + car.length + i < self.SIZE and self.slot_free(car.x, car.y + car.length + i):
-                #         # print("Car %s can move Down" % car.name, car.x, car.y + 1)
-                #         moves.append(self.move_car(car, 0, i+1))
+            for move_x, move_y in self.get_moves(car):
+                moves.append(self.move_car(car, move_x, move_y))
         return moves
 
 
@@ -210,9 +187,8 @@ class Rushhour(object):
 
             if board.is_finished():
                 print("We found a solution by checking %s boards!" % idx)
-
                 print("Paths length", len(paths))
-                return Rushhour.reconstruct_path(start_board, board, paths)
+                return Rushhour.reconstruct_path(start_board, board, move, paths)
 
             possibilities = board.possibilities()
             queue.extend(possibilities)
@@ -228,10 +204,11 @@ class Rushhour(object):
         return None
 
     @staticmethod
-    def reconstruct_path(start_board, end_board, paths):
+    def reconstruct_path(start_board, end_board, last_move, paths):
         """ Returns a list of moves needed to solve the puzzle"""
         solution_path = []
         board = end_board
+        solution_path.append((last_move, end_board))
         while board != start_board:
             move, board = paths[board]
             solution_path.append((move, board))
@@ -240,37 +217,45 @@ class Rushhour(object):
         return solution_path
 
 
+def play_solution(board, solution_path):
+    print('-------------- START --------------')
+    print(board.print_board())
+
+    for move, board in solution_path:
+        if move:
+            car, x, y = move
+            steps = 0
+            direction = "left"
+            if x < 0:
+                direction = "left"
+                steps = x * -1
+            elif x > 0:
+                direction = "right"
+                steps = x
+            elif y < 0:
+                direction = "up"
+                steps = y * -1
+            elif y > 0:
+                direction = "down"
+                steps = y
+
+            print('--------------------------------')
+            print("Move car %s %s steps %s" % (car.name, steps, direction))
+            print(board.print_board())
+
+
 def main(path):
     cars = Rushhour.parse_file(path)
     board = Board(cars)
-
-    print("Board:")
-    print(board.print_board())
 
     start = datetime.now()
     solution_path = Rushhour.find_solution(board)
     delta = datetime.now() - start
 
     if solution_path:
-        print("Solution found in %s seconds and %s steps" % (delta.total_seconds(), len(solution_path)))
-
-        for move, board in solution_path:
-            if move:
-                car, x, y = move
-                direction = "left"
-                if x < 0:
-                    direction = "left"
-                elif x > 0:
-                    direction = "right"
-                elif y < 0:
-                    direction = "up"
-                elif y > 0:
-                    direction = "down"
-
-                print('--------------------------------')
-                print("Move car %s %s" % (car.name, direction))
-                print(board.print_board())
+        play_solution(board, solution_path)
         print('--------------------------------')
+        print("Solution found in %s seconds and %s steps" % (delta.total_seconds(), len(solution_path)))
     else:
         print('No solution found :-(')
 
