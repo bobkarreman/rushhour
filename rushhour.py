@@ -167,7 +167,6 @@ class Rushhour(object):
         Which adds more complexity, that could be used to add a weight to certain moves but not needed in this case.
         ref: http://www.redblobgames.com/pathfinding/a-star/implementation.html
         """
-        # TODO: Keep track of the path to the solution
         seen = set()
         paths = {}
 

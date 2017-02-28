@@ -75,7 +75,7 @@ class TestMoves(unittest.TestCase):
             down_cnt = 0
             left_cnt = 0
             right_cnt = 0
-            for x,y in moves:
+            for x, y in moves:
                 if x < 0:
                     left_cnt += 1
                 if x > 0:
