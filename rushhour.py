@@ -219,7 +219,7 @@ class Rushhour(object):
 def play_solution(board, solution_path):
     print('-------------- START --------------')
     print(board.print_board())
-
+    total_steps = 0
     for move, board in solution_path:
         if move:
             car, x, y = move
@@ -238,9 +238,15 @@ def play_solution(board, solution_path):
                 direction = "down"
                 steps = y
 
+            total_steps += steps
+
             print('--------------------------------')
             print("Move car %s %s steps %s" % (car.name, steps, direction))
             print(board.print_board())
+
+
+        print('--------------------------------')
+        print("Solution found %s moves and %s steps" % (len(solution_path), total_steps))
 
 
 def main(path):
@@ -253,8 +259,7 @@ def main(path):
 
     if solution_path:
         play_solution(board, solution_path)
-        print('--------------------------------')
-        print("Solution found in %s seconds and %s steps" % (delta.total_seconds(), len(solution_path)))
+        print("In %s seconds" % delta.total_seconds())
     else:
         print('No solution found :-(')
 
